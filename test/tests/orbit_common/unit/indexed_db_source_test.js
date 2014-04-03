@@ -23,10 +23,9 @@ function verifyIndexedDBContainsRecord(namespace, type, record, ignoreFields) {
 // module.setup finishes async
 // 
 
-QUnit.config.autostart = false;
-
 module("OrbitCoreSources - IndexedDBSource", {
   setup: function() {
+    console.log("test setup");
     Orbit.Promise = Promise;
 
     var schema = {
@@ -52,20 +51,18 @@ module("OrbitCoreSources - IndexedDBSource", {
       }
     };
 
+    stop();
     source = new IndexedDBSource(schema, {
         namespace : 'planets',
         version   : 1,
-        callback  : function() {
-          QUnit.start();
-        }
+        callback  : start
       });
   },
 
   teardown: function() {
-    window.indexedDB.deleteDatabase(source.namespace);
-
-    source        = null;
-    Orbit.Promise = null;
+    console.log("test teardown");
+    source._idbDeleteDatabase().then(start);
+    stop();
   }
 });
 
@@ -90,7 +87,9 @@ test("#add - can insert records and assign ids", function() {
 test("#update - can update records", function() {
   expect(4);
 
+  stop();
   source.update('planet', {id: 12345, name: 'Jupiter', classification: 'gas giant'}).then(function(planet) {
+    start();
     ok(planet.__id, 'orbit id should be defined');
     equal(planet.id, 12345, 'server id should be defined');
     equal(planet.name, 'Jupiter', 'name should match');
