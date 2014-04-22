@@ -25,11 +25,10 @@ function verifyIndexedDBContainsRecord(namespace, type, record, ignoreFields) {
 
 module("OrbitCoreSources - IndexedDBSource", {
   setup: function() {
-    console.log("test setup");
     Orbit.Promise = Promise;
 
     var schema = {
-      idField: '__id',
+      idField: 'id',
       models: {
         planet: {
           attributes: {
@@ -60,9 +59,8 @@ module("OrbitCoreSources - IndexedDBSource", {
   },
 
   teardown: function() {
-    console.log("test teardown");
-    source._idbDeleteDatabase().then(start);
     stop();
+    source._idbDeleteDatabase().then(start);
   }
 });
 
@@ -76,6 +74,7 @@ test("#add - can insert records and assign ids", function() {
   stop();
   source.add('planet', {name: 'Jupiter', classification: 'gas giant'}).then(function(planet) {
     start();
+    notStrictEqual(planet, null, "Add should return the new planet object");
     ok(planet.__id, 'orbit id should be defined');
     equal(planet.id, 12345, 'server id should be defined');
     equal(planet.name, 'Jupiter', 'name should match');
