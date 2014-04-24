@@ -23,17 +23,23 @@ function verifyIndexedDBContainsRecord(namespace, type, record, ignoreFields) {
 // module.setup finishes async
 // 
 
-module("OrbitCoreSources - IndexedDBSource", {
+module("OC - IndexedDBSource", {
   setup: function() {
     Orbit.Promise = Promise;
 
-    var schema = {
+    var schema = new Schema({
       idField: 'id',
       models: {
         planet: {
           attributes: {
-            name: {type: 'string'},
-            classification: {type: 'string'}
+            name: {
+              type   : 'string',
+              unique : true
+            },
+            classification: {
+              type   : 'string',
+              unique : false
+            }
           },
           links: {
             moons: {type: 'hasMany', model: 'moon', inverse: 'planet'}
@@ -41,26 +47,34 @@ module("OrbitCoreSources - IndexedDBSource", {
         },
         moon: {
           attributes: {
-            name: {type: 'string'}
+            name: {
+              type   : 'string',
+              unique : true
+            }
           },
           links: {
             planet: {type: 'hasOne', model: 'planet', inverse: 'moons'}
           }
         }
       }
-    };
+    });
 
     stop();
     source = new IndexedDBSource(schema, {
         namespace : 'planets',
         version   : 1,
-        callback  : start
+        callback  : function() {
+          start();
+        }
       });
   },
 
   teardown: function() {
     stop();
-    source._idbDeleteDatabase().then(start);
+    source._idbDeleteDatabase().then(function() {
+        start();
+      }
+    );
   }
 });
 
@@ -81,7 +95,6 @@ test("#add - can insert records and assign ids", function() {
     equal(planet.classification, 'gas giant', 'classification should match');
   });
 });
-
 /*
 test("#update - can update records", function() {
   expect(4);
