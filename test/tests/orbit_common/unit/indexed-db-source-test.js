@@ -1,6 +1,6 @@
 import Orbit from 'orbit/main';
-import Schema from 'orbit_common/schema';
-import IndexedDBSource from 'orbit_common/indexed_db_source';
+import Schema from 'orbit-common/schema';
+import IndexedDBSource from 'orbit-common/indexed-db-source';
 import { Promise } from 'rsvp';
 
 var source;
