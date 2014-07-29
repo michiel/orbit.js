@@ -17,6 +17,34 @@ function verifyIndexedDBContainsRecord(namespace, type, record, ignoreFields) {
   return false;
 }
 
+function isPhantom() {
+  return (
+    /* global navigator */
+    navigator.userAgent.toLowerCase().indexOf('phantom') !== -1
+  );
+}
+
+function hasIndexedDBGlobal() {
+  return (
+    typeof(window.indexedDB) !== 'undefined'
+  );
+}
+
+function browserHasIndexedDB() {
+  return (
+    !isPhantom() &&
+    hasIndexedDBGlobal()
+  );
+}
+
+function skippableTest(str, fn) {
+  if (browserHasIndexedDB()) {
+    test(str, fn);
+  } else {
+    console.log('Skipping test ' + str + ' : IndexedDB is not available in this browser');
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 //
@@ -78,11 +106,11 @@ module("OC - IndexedDBSource", {
   }
 });
 
-test("it exists", function() {
+skippableTest("it exists", function() {
   ok(source);
 });
 
-test("#add - can insert records and assign ids", function() {
+skippableTest("#add - can insert records and assign ids", function() {
   expect(4);
 
   stop();
@@ -96,7 +124,7 @@ test("#add - can insert records and assign ids", function() {
   });
 });
 /*
-test("#update - can update records", function() {
+skippableTest("#update - can update records", function() {
   expect(4);
 
   stop();
@@ -109,7 +137,7 @@ test("#update - can update records", function() {
   });
 });
 
-test("#patch - can patch records", function() {
+skippableTest("#patch - can patch records", function() {
   expect(1);
 
   source.patch('planet', {id: 12345}, 'classification', 'gas giant').then(function() {
@@ -117,7 +145,7 @@ test("#patch - can patch records", function() {
   });
 });
 
-test("#remove - can delete records", function() {
+skippableTest("#remove - can delete records", function() {
   expect(1);
 
   source.remove('planet', {id: 12345}).then(function() {
@@ -125,7 +153,7 @@ test("#remove - can delete records", function() {
   });
 });
 
-test("#link - can patch records with inverse relationships", function() {
+skippableTest("#link - can patch records with inverse relationships", function() {
   expect(1);
 
   source.link('planet', {id: 12345}, 'moons', {id: 987}).then(function() {
@@ -133,7 +161,7 @@ test("#link - can patch records with inverse relationships", function() {
   });
 });
 
-test("#unlink - can patch records with inverse relationships", function() {
+skippableTest("#unlink - can patch records with inverse relationships", function() {
   expect(1);
 
   source.unlink('planet', {id: 12345}, 'moons', {id: 987}).then(function() {
@@ -141,7 +169,7 @@ test("#unlink - can patch records with inverse relationships", function() {
   });
 });
 
-test("#find - can find individual records by passing in a single id", function() {
+skippableTest("#find - can find individual records by passing in a single id", function() {
   expect(5);
 
   source.add('planet', {name: 'Jupiter', classification: 'gas giant'}).then(function(planet) {
@@ -154,7 +182,7 @@ test("#find - can find individual records by passing in a single id", function()
   });
 });
 
-test("#find - can find all records", function() {
+skippableTest("#find - can find all records", function() {
   expect(13);
 
   var records = [
@@ -177,7 +205,7 @@ test("#find - can find all records", function() {
   });
 });
 
-test("#find - can filter records", function() {
+skippableTest("#find - can filter records", function() {
   expect(18);
 
   var records = [
