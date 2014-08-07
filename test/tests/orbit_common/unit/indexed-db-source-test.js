@@ -55,6 +55,7 @@ module("OC - IndexedDBSource", {
   setup: function() {
     Orbit.Promise = Promise;
 
+    var namespace = 'planets';
     var schema = new Schema({
       idField: 'id',
       models: {
@@ -88,13 +89,25 @@ module("OC - IndexedDBSource", {
     });
 
     stop();
-    source = new IndexedDBSource(schema, {
-        namespace : 'planets',
-        version   : 1,
-        callback  : function() {
-          start();
-        }
-      });
+    var request = window.indexedDB.deleteDatabase(namespace);
+
+    request.onerror = function(e) {
+      console.log("indexedDB.deleteDatabase for setup : error", e);
+    }.bind(this);
+
+    request.onsuccess = function(e) {
+      console.log("indexedDB.deleteDatabase for setup : success");
+      source = new IndexedDBSource(schema, {
+          namespace     : namespace,
+          autoIncrement : false,
+          version       : 1,
+          callback      : function() {
+            console.log('setup - callback - start');
+            start();
+          }
+        });
+    }.bind(this);
+
   },
 
   teardown: function() {
@@ -118,12 +131,12 @@ skippableTest("#add - can insert records and assign ids", function() {
     start();
     notStrictEqual(planet, null, "Add should return the new planet object");
     ok(planet.__id, 'orbit id should be defined');
-    equal(planet.id, 12345, 'server id should be defined');
+    ok(planet.id, 'storage id should be defined');
     equal(planet.name, 'Jupiter', 'name should match');
     equal(planet.classification, 'gas giant', 'classification should match');
   });
 });
-/*
+
 skippableTest("#update - can update records", function() {
   expect(4);
 
@@ -228,4 +241,3 @@ skippableTest("#find - can filter records", function() {
     }
   });
 });
-*/
